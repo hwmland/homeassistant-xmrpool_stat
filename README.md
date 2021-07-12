@@ -5,6 +5,8 @@
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/hwmland/homeassistant-xmrpool_stat?style=plastic)
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/hwmland/homeassistant-xmrpool_stat/latest?style=plastic)
 
+[![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buy%20Me%20a%20Coffee-ff813f?style=flat)](https://www.buymeacoffee.com/hwmland)
+
 Sensors dowloading some statistic data from https://web.xmrpool.eu/
 It supports following sensors currently:
 
