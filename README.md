@@ -1,6 +1,7 @@
 # XMR Pool Statistics integration for Home Assistant
 
 ![GitHub](https://img.shields.io/github/license/hwmland/homeassistant-xmrpool_stat?style=plastic)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
 
 Sensors dowloading some statistic data from https://web.xmrpool.eu/
 It supports following sensors currently:
