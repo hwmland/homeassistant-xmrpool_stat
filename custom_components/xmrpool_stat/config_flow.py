@@ -19,11 +19,9 @@ _LOGGER = logging.getLogger(__name__)
 #   configured_instances
 # ---------------------------
 @callback
-def configured_instances(hass):
+def configured_instances(hass, item: str):
     """Return a set of configured instances."""
-    return set(
-        entry.data[CONF_NAME] for entry in hass.config_entries.async_entries(DOMAIN)
-    )
+    return set(entry.data[item] for entry in hass.config_entries.async_entries(DOMAIN))
 
 
 class ConfigFlowException(Exception):
@@ -53,8 +51,12 @@ class XmrPoolFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 _LOGGER.debug("user_input not None")
-                if user_input[CONF_NAME] in configured_instances(self.hass):
+                if user_input[CONF_NAME] in configured_instances(self.hass, CONF_NAME):
                     raise ConfigFlowException("name_exists")
+                if user_input[CONF_WALLET] in configured_instances(
+                    self.hass, CONF_WALLET
+                ):
+                    raise ConfigFlowException("wallet_exists")
 
                 resource = (
                     "https://web.xmrpool.eu:8119/stats_address?address="

@@ -7,8 +7,8 @@ from typing import Any, Dict, Optional
 from voluptuous.validators import Switch
 
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
-from homeassistant.core import callback
+from homeassistant.const import CONF_NAME
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import CONF_NAME, STATE_UNKNOWN
 
@@ -16,23 +16,37 @@ from homeassistant.const import CONF_NAME, STATE_UNKNOWN
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.typing import StateType
 
-###
-from random import randint
-
 from .const import (
     DATA_CONTROLLER,
     DOMAIN,
 )
+from .helpers import DefaultTo
 from .xmrpoolstat_controller import XmrPoolStatController
 
 _LOGGER = logging.getLogger(__name__)
 
+SETUP_FACTORY = "facktory"
+SETUP_ICON = "icon"
+SETUP_NAME = "name"
+SETUP_UNIT = "unit"
+
 _SENSORS = {
-    "Balance": {"factory": lambda: XmrPoolStatisticsSensorBalance, "unit": "XMR"},
-    "hashrate": {"factory": lambda: XmrPoolStatisticsSensorHashrate},
+    "balance": {
+        SETUP_FACTORY: lambda: XmrPoolStatisticsSensorBalance,
+        SETUP_NAME: "Balance",
+        SETUP_UNIT: "XMR",
+        SETUP_ICON: "mdi:bitcoin",
+    },
+    "hashrate": {
+        SETUP_FACTORY: lambda: XmrPoolStatisticsSensorHashrate,
+        SETUP_NAME: "Hashrate",
+        SETUP_ICON: "mdi:gauge",
+    },
     "hashrate-raw": {
-        "factory": lambda: XmrPoolStatisticsSensorHashrateRaw,
-        "unit": "H/s",
+        SETUP_FACTORY: lambda: XmrPoolStatisticsSensorHashrateRaw,
+        SETUP_NAME: "Hashrate Raw",
+        SETUP_UNIT: "H/s",
+        SETUP_ICON: "mdi:gauge",
     },
 }
 
@@ -43,7 +57,7 @@ async def async_setup_entry(
     """Set up XMR pool statistics sensor."""
     _LOGGER.debug(
         "async_setup_entry({0}), state: {1}".format(
-            configEntry.data["name"], configEntry.state
+            configEntry.data[CONF_NAME], configEntry.state
         )
     )
 
@@ -83,14 +97,14 @@ def UpdateItems(
                 sensors[sensorId].async_schedule_update_ha_state()
         else:
             sensorDefinition = _SENSORS[sensor]
-            sensorFactory = sensorDefinition["factory"]()
+            sensorFactory = sensorDefinition[SETUP_FACTORY]()
             sensorInstance = sensorFactory(
                 instanceName, sensor, controller, sensorDefinition
             )
             sensors[sensorId] = sensorInstance
             sensorsToAdd.append(sensorInstance)
     if sensorsToAdd:
-        async_add_entities(sensorsToAdd)
+        async_add_entities(sensorsToAdd, True)
 
 
 ################################################
@@ -108,13 +122,23 @@ class XmrPoolStatisticsSensor(SensorEntity):
         self._instanceName = instanceName
         self._sensorName = sensorName
         self._controller = controller
-        self._unit = sensorDefinition.get("unit")
+        self._name = "{} {}".format(
+            self._instanceName,
+            DefaultTo(sensorDefinition.get(SETUP_NAME), self._sensorName),
+        )
+        self._icon = sensorDefinition.get(SETUP_ICON)
+        self._unit = sensorDefinition.get(SETUP_UNIT)
         self._privateInit()
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID."""
+        return self._controller.entity_id + self._sensorName
 
     @property
     def name(self) -> str:
         """Return name"""
-        return "{} {}".format(self._instanceName, self._sensorName)
+        return self._name
 
     @property
     def state(self) -> StateType:
@@ -128,6 +152,11 @@ class XmrPoolStatisticsSensor(SensorEntity):
     def unit_of_measurement(self) -> str:
         """Return the unit of measurement of this entity, if any."""
         return self._unit
+
+    @property
+    def icon(self) -> str:
+        """Return the icon."""
+        return self._icon
 
     async def async_update(self):
         """Synchronize state with controller."""

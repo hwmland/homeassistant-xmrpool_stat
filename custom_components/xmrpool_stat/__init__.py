@@ -5,6 +5,7 @@ import logging
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, device_registry as dr
 
@@ -33,7 +34,7 @@ async def async_setup_entry(
     """Set up a wallet for a config entry."""
     _LOGGER.debug(
         "async_setup_entry({0}), state: {1}".format(
-            config_entry.data["name"], config_entry.state
+            config_entry.data[CONF_NAME], config_entry.state
         )
     )
 
@@ -49,4 +50,21 @@ async def async_setup_entry(
         hass.config_entries.async_forward_entry_setup(config_entry, "sensor")
     )
 
+    return True
+
+
+async def async_unload_entry(
+    hass: HomeAssistant, config_entry: config_entries.ConfigEntry
+) -> bool:
+    """Unload a config entry."""
+    _LOGGER.debug(
+        "async_unload_entry({0}), state: {1}".format(
+            config_entry.data[CONF_NAME], config_entry.state
+        )
+    )
+    controller: XmrPoolStatController = hass.data[DOMAIN][DATA_CONTROLLER][
+        config_entry.entry_id
+    ]
+    await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
+    await controller.async_reset()
     return True

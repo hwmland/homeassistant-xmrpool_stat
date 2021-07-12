@@ -29,7 +29,6 @@ class XmrPoolStatController:
         self._lock = asyncio.Lock()
         self._hass = hass
         self._name = config_entry.data[CONF_NAME]
-        self.listeners = []
         self._scheduledUpdateCallback = None
         resource = (
             "https://web.xmrpool.eu:8119/stats_address?address="
@@ -47,12 +46,24 @@ class XmrPoolStatController:
         )
         self._statData = None
         self._workersData = None
+        self.listeners = []
+        self.entity_id = config_entry.entry_id
 
     async def async_initialize(self) -> None:
         """Async initialization"""
+        await self.async_ScheduledUpdate()
         self._scheduledUpdateCallback = async_track_time_interval(
             self._hass, self.async_ScheduledUpdate, timedelta(seconds=30)
         )
+
+    async def async_reset(self) -> bool:
+        """Reset dispatchers"""
+        for unsub_dispatcher in self.listeners:
+            unsub_dispatcher()
+
+        self.listeners = []
+        self._scheduledUpdateCallback()  # remove it now
+        return True
 
     @callback
     async def async_ScheduledUpdate(self, _now=None):
