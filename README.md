@@ -4,8 +4,10 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=plastic)](https://github.com/custom-components/hacs)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/hwmland/homeassistant-xmrpool_stat?style=plastic)
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/hwmland/homeassistant-xmrpool_stat/latest?style=plastic)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/hwmland/homeassistant-xmrpool_stat/Validate%20with%20HACS?label=Validate%20with%20HACS)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/hwmland/homeassistant-xmrpool_stat/Validate%20with%20hassfest?label=Validate%20with%20hassfest)
 
-[![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buy%20Me%20a%20Coffee-ff813f?style=flat)](https://www.buymeacoffee.com/hwmland)
+[![buymeacoffee_badge](https://img.shields.io/badge/Donate-Buy%20Me%20a%20Coffee-ff813f?style=plastic)](https://www.buymeacoffee.com/hwmland)
 
 Sensors dowloading some statistic data from https://web.xmrpool.eu/
 It supports following sensors currently:
