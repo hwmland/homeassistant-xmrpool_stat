@@ -15,6 +15,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import async_track_time_interval
 
 from .const import CONF_WALLET, DOMAIN
+from .helpers import GetDictValue
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -113,17 +114,14 @@ class XmrPoolStatController:
         """Is controller in error (no data)?"""
         return self._statData == None
 
-    @property
-    def Balance(self) -> float:
-        """Actual wallet balance"""
-        return float(self._statData["balance"]) / 1e12
-
-    def GetHashrate(self, worker: str) -> str:
-        """Get hashrate for specific worker"""
+    def GetData(self, worker: str) -> dict:
+        """Get data block corresponding to worker"""
         if self.InError:
             return None
         if worker == None:
-            return self._statData["hashrate"]
-        if worker not in self._workersData:
-            return None
-        return self._workersData[worker]["hashrate"]
+            return self._statData
+        return GetDictValue(self._workersData, worker)
+
+    def GetValue(self, worker: str, value: str) -> str:
+        """Get value for corresponding worker"""
+        return GetDictValue(self.GetData(worker), value)
