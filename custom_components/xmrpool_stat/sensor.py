@@ -20,7 +20,7 @@ from .const import (
     DATA_CONTROLLER,
     DOMAIN,
 )
-from .helpers import DefaultTo, GetDictValue
+from .helpers import DefaultTo
 from .xmrpoolstat_controller import XmrPoolStatController
 
 _LOGGER = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ SETUP_UNIT = "unit"
 SETUP_KEY = "key"
 SETUP_FACTOR = "factor"
 
-_SENSORS = {
+_SENSORS: Dict[str, Dict[str, Any]] = {
     "balance": {
         SETUP_NAME: "Balance",
         SETUP_FACTORY: lambda: XmrPoolStatisticsSensorScaled,
@@ -117,11 +117,11 @@ def UpdateItems(
     instanceName: str,
     controller: XmrPoolStatController,
     async_add_entities,
-    sensors: dict,
+    sensors: Dict[str, Any],
 ) -> None:
     """Update sensor state"""
     _LOGGER.debug("UpdateItems({})".format(instanceName))
-    sensorsToAdd = []
+    sensorsToAdd: Dict[str, Any] = []
 
     for sensor in _SENSORS:
         sensorId = "{}-{}".format(instanceName, sensor)
@@ -149,7 +149,7 @@ class XmrPoolStatisticsSensor(SensorEntity):
         instanceName: str,
         sensorName: str,
         controller: XmrPoolStatController,
-        sensorDefinition: dict,
+        sensorDefinition: Dict[str, Any],
     ) -> None:
         """Initialize"""
         self._instanceName = instanceName
@@ -281,8 +281,17 @@ class XmrPoolStatisticsSensorScaled(XmrPoolStatisticsSensorValue):
         self._factor: float = self._sensorDefinition[SETUP_FACTOR]
 
 
-################################################
-class XmrPoolStatisticsSensorBalance(XmrPoolStatisticsSensor):
-    @property
-    def _stateInternal(self) -> StateType:
-        return self._controller.Balance
+#   @property
+#   def device_info(self) -> Dict[str, Any]:
+#       """Return a description for device registry."""
+#       info = {
+#           "name": "test",
+#           "identifiers": {
+#               (
+#                   DOMAIN,
+#                   self._instanceName,
+#               )
+#           },
+#       }
+#
+#       return info
