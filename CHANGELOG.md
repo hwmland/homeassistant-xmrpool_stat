@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - Implement more sensors
 
-## [v0.1.1] - 2021-07-15
+## [v0.1.1](https://github.com/hwmland/homeassistant-xmrpool_stat/releases/tag/v0.1.1) - 2021-07-15
 
 ### Added
 
@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file.
 
 - Fixes because of publishing to HACS default
 
-## [v0.1.0] - 2021-07-12
+## [v0.1.0](https://github.com/hwmland/homeassistant-xmrpool_stat/releases/tag/v0.1.0)  - 2021-07-12
 
 ### Added
 
