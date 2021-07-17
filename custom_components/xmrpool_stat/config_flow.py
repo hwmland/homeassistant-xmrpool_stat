@@ -90,7 +90,7 @@ class XmrPoolFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 # Input is valid, set data.
                 self.data = user_input
                 return self.async_create_entry(
-                    title="XMR Pool Statistics", data=self.data
+                    title=user_input[CONF_NAME], data=self.data
                 )
 
         _LOGGER.debug("Show input form...")

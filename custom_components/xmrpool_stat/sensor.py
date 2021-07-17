@@ -29,24 +29,57 @@ SETUP_FACTORY = "facktory"
 SETUP_ICON = "icon"
 SETUP_NAME = "name"
 SETUP_UNIT = "unit"
+SETUP_KEY = "key"
+SETUP_FACTOR = "factor"
 
-_SENSORS = {
+_SENSORS: Dict[str, Dict[str, Any]] = {
     "balance": {
-        SETUP_FACTORY: lambda: XmrPoolStatisticsSensorBalance,
         SETUP_NAME: "Balance",
+        SETUP_FACTORY: lambda: XmrPoolStatisticsSensorScaled,
+        SETUP_KEY: "balance",
+        SETUP_FACTOR: 1e12,
         SETUP_UNIT: "XMR",
         SETUP_ICON: "mdi:bitcoin",
     },
     "hashrate": {
-        SETUP_FACTORY: lambda: XmrPoolStatisticsSensorHashrate,
         SETUP_NAME: "Hashrate",
+        SETUP_FACTORY: lambda: XmrPoolStatisticsSensorHashrate,
         SETUP_ICON: "mdi:gauge",
     },
     "hashrate-raw": {
-        SETUP_FACTORY: lambda: XmrPoolStatisticsSensorHashrateRaw,
         SETUP_NAME: "Hashrate Raw",
+        SETUP_FACTORY: lambda: XmrPoolStatisticsSensorHashrateRaw,
         SETUP_UNIT: "H/s",
         SETUP_ICON: "mdi:gauge",
+    },
+    "hashes": {
+        SETUP_NAME: "Hashes",
+        SETUP_FACTORY: lambda: XmrPoolStatisticsSensorValue,
+        SETUP_KEY: "hashes",
+        SETUP_UNIT: "H",
+        SETUP_ICON: "mdi:counter",
+    },
+    "expired": {
+        SETUP_NAME: "Expired",
+        SETUP_FACTORY: lambda: XmrPoolStatisticsSensorValue,
+        SETUP_KEY: "expired",
+        SETUP_UNIT: "H",
+        SETUP_ICON: "mdi:counter",
+    },
+    "invalid": {
+        SETUP_NAME: "Invalid",
+        SETUP_FACTORY: lambda: XmrPoolStatisticsSensorValue,
+        SETUP_KEY: "invalid",
+        SETUP_UNIT: "H",
+        SETUP_ICON: "mdi:counter",
+    },
+    "last-reward": {
+        SETUP_NAME: "Last reward",
+        SETUP_FACTORY: lambda: XmrPoolStatisticsSensorScaled,
+        SETUP_KEY: "last_reward",
+        SETUP_FACTOR: 1e12,
+        SETUP_UNIT: "XMR",
+        SETUP_ICON: "mdi:bitcoin",
     },
 }
 
@@ -84,11 +117,11 @@ def UpdateItems(
     instanceName: str,
     controller: XmrPoolStatController,
     async_add_entities,
-    sensors: dict,
+    sensors: Dict[str, Any],
 ) -> None:
     """Update sensor state"""
     _LOGGER.debug("UpdateItems({})".format(instanceName))
-    sensorsToAdd = []
+    sensorsToAdd: Dict[str, Any] = []
 
     for sensor in _SENSORS:
         sensorId = "{}-{}".format(instanceName, sensor)
@@ -116,7 +149,7 @@ class XmrPoolStatisticsSensor(SensorEntity):
         instanceName: str,
         sensorName: str,
         controller: XmrPoolStatController,
-        sensorDefinition: dict,
+        sensorDefinition: Dict[str, Any],
     ) -> None:
         """Initialize"""
         self._instanceName = instanceName
@@ -128,6 +161,7 @@ class XmrPoolStatisticsSensor(SensorEntity):
         )
         self._icon = sensorDefinition.get(SETUP_ICON)
         self._unit = sensorDefinition.get(SETUP_UNIT)
+        self._sensorDefinition = sensorDefinition
         self._privateInit()
 
     @property
@@ -199,7 +233,7 @@ class XmrPoolStatisticsSensorHashrate(XmrPoolStatisticsSensor):
     async def async_update(self):
         """Synchronize state with controller."""
         _LOGGER.debug("XmrPoolStatisticsSensorHashrate.async_update")
-        self._value = self._controller.GetHashrate(None).split()
+        self._value = self._controller.GetValue(None, "hashrate").split()
 
     def _privateInit(self) -> None:
         """Private instance intialization"""
@@ -225,7 +259,39 @@ class XmrPoolStatisticsSensorHashrateRaw(XmrPoolStatisticsSensorHashrate):
 
 
 ################################################
-class XmrPoolStatisticsSensorBalance(XmrPoolStatisticsSensor):
+class XmrPoolStatisticsSensorValue(XmrPoolStatisticsSensor):
     @property
     def _stateInternal(self) -> StateType:
-        return self._controller.Balance
+        return self._controller.GetValue(None, self._key)
+
+    def _privateInit(self) -> None:
+        """Private instance intialization"""
+        self._key: str = self._sensorDefinition[SETUP_KEY]
+
+
+################################################
+class XmrPoolStatisticsSensorScaled(XmrPoolStatisticsSensorValue):
+    @property
+    def _stateInternal(self) -> StateType:
+        return float(self._controller.GetValue(None, self._key)) / self._factor
+
+    def _privateInit(self) -> None:
+        """Private instance intialization"""
+        super()._privateInit()
+        self._factor: float = self._sensorDefinition[SETUP_FACTOR]
+
+
+#   @property
+#   def device_info(self) -> Dict[str, Any]:
+#       """Return a description for device registry."""
+#       info = {
+#           "name": "test",
+#           "identifiers": {
+#               (
+#                   DOMAIN,
+#                   self._instanceName,
+#               )
+#           },
+#       }
+#
+#       return info
