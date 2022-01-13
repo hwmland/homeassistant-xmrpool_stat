@@ -236,6 +236,8 @@ class XmrPoolStatisticsSensorHashrate(XmrPoolStatisticsSensor):
         value = self._controller.GetValue(None, "hashrate")
         if value is not None:
             self._value = value.split()
+        else:
+            self._value = ['0', 'H']
 
     def _privateInit(self) -> None:
         """Private instance intialization"""
