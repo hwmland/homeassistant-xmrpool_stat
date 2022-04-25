@@ -12,7 +12,6 @@
                     "wallet": "Wallet address"
                 },
                 "description": "Setup XMR Pool Wallet",
-                "title": "XMR Pool Statistics"
             }
         }
     }
