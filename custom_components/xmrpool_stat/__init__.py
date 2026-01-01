@@ -8,6 +8,7 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, device_registry as dr
+from homeassistant.const import Platform
 
 from .const import (
     CONF_WALLET,
@@ -17,7 +18,7 @@ from .const import (
 from .xmrpoolstat_controller import XmrPoolStatController
 
 _LOGGER = logging.getLogger(__name__)
-
+PLATFORMS: list[Platform] = [Platform.SENSOR]
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """XMR Pool Statistics custom component."""
@@ -46,9 +47,7 @@ async def async_setup_entry(
     await controller.async_initialize()
     hass.data[DOMAIN][DATA_CONTROLLER][config_entry.entry_id] = controller
 
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(config_entry, "sensor")
-    )
+    await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
 
     return True
 
@@ -65,6 +64,6 @@ async def async_unload_entry(
     controller: XmrPoolStatController = hass.data[DOMAIN][DATA_CONTROLLER][
         config_entry.entry_id
     ]
-    await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
+    await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     await controller.async_reset()
     return True
